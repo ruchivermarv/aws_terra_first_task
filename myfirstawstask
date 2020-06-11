@@ -1,0 +1,13 @@
+<html>
+<body bgcolor="aqua"> 
+<p style=color:white>"Hello"</p>
+<img src="https://myintegratedbucket.s3.ap-south-1.amazonaws.com/ruchiimg.jpg" width="1000"  height="1000">
+<pre>
+<?php 
+
+print `ifconfig`;
+
+?>
+</pre>
+</body>
+</html>
