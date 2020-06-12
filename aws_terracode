@@ -1,0 +1,80 @@
+resource "aws_security_group" "firstterrasec" {
+     name        = "firstterrasec"
+     description = "Allow TLS inbound traffic"
+     vpc_id      = "vpc-4494892c"
+     ingress {
+         description = "SSH"
+         from_port   = 22
+         to_port     = 22
+         protocol    = "tcp"
+         cidr_blocks = [ "0.0.0.0/0" ]
+}
+ingress {
+  description = "HTTP"
+  from_port   = 80
+  to_port     = 80
+  protocol    = "tcp"
+  cidr_blocks = [ "0.0.0.0/0" ]
+}
+egress {
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+tags = {
+  Name = "firstterrasec"
+}
+}
+
+resource "aws_ebs_volume" "firstterraebs" {
+  availability_zone = aws_instance.myin.availability_zone
+  size              = 1
+tags = {
+  Name = "firstterraebs"
+}
+}
+
+resource "aws_volume_attachment" "ebs_att"{
+  device_name = "/dev/sdf"
+  volume_id = aws_ebs_volume.firstterraebs.id
+  instance_id = aws_instance.myin.id
+}
+
+
+resource "aws_instance" "myin" {
+       ami = "ami-0447a12f28fddb066"
+       instance_type = "t2.micro"
+       key_name = aws_key_pair.myfirstterrakey.key_name
+       security_groups = [ "firstterrasec" ] 
+  user_data = <<-EOF
+ 
+       #! /bin/bash
+      sudo yum install httpd -y
+      sudo systemctl start httpd
+      sudo systemctl enable httpd
+      sudo yum install git -y
+      mkfs.ext4 /dev/xvdf1
+      mount /dev/xvdf1 /var/www/html
+      cd /var/www/html
+      git clone https://github.com/ruchivermarv/aws_terra_first_task.git
+     EOF
+tags = {
+    Name = "myec2instfirst"
+  }
+} 
+
+//creating a s3 bucket 
+resource "aws_s3_bucket" "myterrabucketruchi" {
+  bucket = "myterrabucketruchi"
+  acl    = "public-read"
+
+  tags = {
+    Name        = "My bucket first"
+    Environment = "Dev"
+  }
+}
+
+locals {
+  s3_origin_id = "mys3origin"
+}
